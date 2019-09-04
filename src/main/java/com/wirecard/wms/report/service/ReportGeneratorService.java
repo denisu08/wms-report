@@ -1,6 +1,7 @@
 package com.wirecard.wms.report.service;
 
 
+import com.wirecard.wms.report.vo.ReportData;
 import com.wirecard.wms.report.vo.User;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JsonDataSource;
@@ -49,16 +50,16 @@ public class ReportGeneratorService {
     }
 
     @Async("reportExecutor")
-    public CompletableFuture<Map> downloadReport(Map<String, Object> parameterReport, JSONObject jsonData, JSONObject parameterJSON, boolean isImage, byte[] reportBytes) throws Exception {
+    public CompletableFuture<Map> downloadReport(ReportData reportData) throws Exception {
         JasperDesign design = null;
         JasperPrint jasperPrint = null;
         boolean isJasperMain = false;
         String jasperReportBase64 = null;
         JasperReport mainJasperReport = null;
-        if (isImage) {
-            design = JRXmlLoader.load(new ByteArrayInputStream(reportBytes));
+        if (reportData.isImage()) {
+            design = JRXmlLoader.load(new ByteArrayInputStream(reportData.getReportBytes()));
         } else {
-            List<Map> reportFiles = (List<Map>) parameterJSON.get("reportFiles");
+            List<Map> reportFiles = (List<Map>) reportData.getParameterJSON().get("reportFiles");
             for (Map item : reportFiles) {
                 if (item.get("jasper") != null) {
                     byte[] jasperTmpBytes = Base64.getDecoder().decode((String) item.get("jasper"));
@@ -67,33 +68,33 @@ public class ReportGeneratorService {
                         jasperReportBase64 = new String(jasperTmpBytes);
                         mainJasperReport = (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes));
                     } else {
-                        parameterReport.put((String) item.get("keySubReport"), (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes)));
+                        reportData.getParameterReport().put((String) item.get("keySubReport"), (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes)));
                     }
                 } else {
                     byte[] reportTmpBytes = Base64.getDecoder().decode((String) item.get("reportData"));
                     if ((Boolean) item.getOrDefault("isMain", false)) {
                         design = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
                     } else {
-                        parameterReport.put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
+                        reportData.getParameterReport().put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
                     }
                 }
             }
         }
 
-        JsonDataSource jsonDataSource = new JsonDataSource(new ByteArrayInputStream(jsonData.toString().getBytes()));
+        JsonDataSource jsonDataSource = new JsonDataSource(new ByteArrayInputStream(reportData.getJsonData().toString().getBytes()));
         if (isJasperMain) {
-            jasperPrint = JasperFillManager.fillReport(mainJasperReport, parameterReport, jsonDataSource);
+            jasperPrint = JasperFillManager.fillReport(mainJasperReport, reportData.getParameterReport(), jsonDataSource);
         } else {
             ByteArrayOutputStream bais = new ByteArrayOutputStream();
             JasperCompileManager.compileReportToStream(design, bais);
             jasperReportBase64 = new String(Base64.getEncoder().encode(bais.toByteArray()));
-            jasperPrint = JasperFillManager.fillReport(new ByteArrayInputStream(bais.toByteArray()), parameterReport, jsonDataSource);
+            jasperPrint = JasperFillManager.fillReport(new ByteArrayInputStream(bais.toByteArray()), reportData.getParameterReport(), jsonDataSource);
         }
 
         JasperPrintManager printManager = JasperPrintManager.getInstance(DefaultJasperReportsContext.getInstance());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        if (isImage) {
+        if (reportData.isImage()) {
             BufferedImage rendered_image = (BufferedImage) printManager.printPageToImage(jasperPrint, 0, 1.6f);
             ImageIO.write(rendered_image, "png", outputStream);
         } else {
