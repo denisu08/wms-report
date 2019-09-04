@@ -8,42 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 public class ReportController {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
-
-    @Value("${report.thread.core-pool}")
-    private int corePoolSize;
-
-    @Value("${report.thread.max-pool}")
-    private int maxPoolSize;
-
-    @Value("${report.queue.capacity}")
-    private int queueCapacity;
-
-    @Value("${report.thread.timeout}")
-    private int threadTimeout;
-
-    @Bean
-    @Qualifier("reportExecutor")
-    public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
-        ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(corePoolSize);
-        threadPoolTaskExecutor.setMaxPoolSize(maxPoolSize);
-        threadPoolTaskExecutor.setQueueCapacity(queueCapacity);
-        threadPoolTaskExecutor.setKeepAliveSeconds(threadTimeout);
-
-        return threadPoolTaskExecutor;
-    }
 
     @Autowired
     private ReportGeneratorService reportGeneratorService;
@@ -52,6 +22,7 @@ public class ReportController {
     public String index() throws Exception {
         // Start the clock
         long start = System.currentTimeMillis();
+
         // Kick of multiple, asynchronous lookups
         CompletableFuture<User> page1 = reportGeneratorService.findUser("PivotalSoftware");
         CompletableFuture<User> page2 = reportGeneratorService.findUser("CloudFoundry");

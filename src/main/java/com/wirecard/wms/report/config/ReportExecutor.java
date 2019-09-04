@@ -1,11 +1,12 @@
-/*
 package com.wirecard.wms.report.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ReportExecutor {
     @Value("${report.thread.core-pool}")
     private int corePoolSize;
@@ -31,4 +32,3 @@ public class ReportExecutor {
         return threadPoolTaskExecutor;
     }
 }
-*/
