@@ -14,8 +14,33 @@
 	<name>wms-report</name>
 	<description>WMS Report Tools</description>
 
+	<repositories>
+		<repository>
+			<id>repo1</id>
+			<name>Maven Repository</name>
+			<url>http://central.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>repo2</id>
+			<name>Apache Development Snapshot Repository</name>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>repo3</id>
+			<name>Jasper Repository Artifacts</name>
+			<url>http://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+		</repository>
+		<repository>
+			<id>repo4</id>
+			<name>Jasper Repository Releases</name>
+			<url>https://jaspersoft.jfrog.io/jaspersoft/jr-ce-releases/</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>1.8</java.version>
+		<jasperreports.version>6.8.1</jasperreports.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -27,6 +52,71 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.aprisma.3rdparty</groupId>
+			<artifactId>json</artifactId>
+			<version>1.1.5-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Report Dependencies -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-functions</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-metadata</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-annotation-processors</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-chart-customizers</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-chart-themes</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-custom-visualization</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-html-component</artifactId>
+			<version>6.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.wirecard.wms</groupId>
+			<artifactId>jasperreport-custom-function</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ar.com.fdvs</groupId>
+			<artifactId>DynamicJasper-core-fonts</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 
