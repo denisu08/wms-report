@@ -1,66 +1,101 @@
 package com.wirecard.wms.report.vo;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.Arrays;
+import java.io.Serializable;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReportData {
-    private Map<String, Object> parameterReport = new HashMap<>();
-    private JSONObject jsonData = new JSONObject();
-    private JSONObject parameterJSON = new JSONObject();
-    private boolean isImage = false;
-    private byte[] reportBytes = null;
+public class ReportData implements Serializable {
 
-    public Map<String, Object> getParameterReport() {
-        return parameterReport;
+    private String languageGson;
+    private String jsonData;
+    private String parameterJSON;
+    private String isImage = "N";
+    private String reportBytes;
+
+    public String getLanguageGson() {
+        return languageGson;
     }
 
-    public void setParameterReport(Map<String, Object> parameterReport) {
-        this.parameterReport = parameterReport;
+    public void setLanguageGson(String languageGson) {
+        this.languageGson = languageGson;
     }
 
-    public JSONObject getJsonData() {
+    public String getJsonData() {
         return jsonData;
     }
 
-    public void setJsonData(JSONObject jsonData) {
+    public void setJsonData(String jsonData) {
         this.jsonData = jsonData;
     }
 
-    public JSONObject getParameterJSON() {
+    public String getParameterJSON() {
         return parameterJSON;
     }
 
-    public void setParameterJSON(JSONObject parameterJSON) {
+    public void setParameterJSON(String parameterJSON) {
         this.parameterJSON = parameterJSON;
     }
 
-    public boolean isImage() {
+    public String getIsImage() {
         return isImage;
     }
 
-    public void setImage(boolean image) {
-        isImage = image;
+    public void setIsImage(String isImage) {
+        this.isImage = isImage;
     }
 
-    public byte[] getReportBytes() {
+    public String getReportBytes() {
         return reportBytes;
     }
 
-    public void setReportBytes(byte[] reportBytes) {
+    public void setReportBytes(String reportBytes) {
         this.reportBytes = reportBytes;
+    }
+
+    public Map<String, Object> getLanguageGsonValue() {
+        Map<String, Object> result = new Gson().fromJson(
+                this.languageGson, new TypeToken<HashMap<String, Object>>() {
+                }.getType()
+        );
+        return result;
+    }
+
+    public Map<String, Object> getJsonDataValue() {
+        Map<String, Object> result = new Gson().fromJson(
+                this.jsonData, new TypeToken<HashMap<String, Object>>() {
+                }.getType()
+        );
+        return result;
+    }
+
+    public Map<String, Object> getParameterJSONValue() {
+        Map<String, Object> result = new Gson().fromJson(
+                this.parameterJSON, new TypeToken<HashMap<String, Object>>() {
+                }.getType()
+        );
+        return result;
+    }
+
+    public boolean isImageValue() {
+        return "N".equalsIgnoreCase(this.isImage);
+    }
+
+    public byte[] getReportBytesValue() {
+        return Base64.getDecoder().decode(this.reportBytes);
     }
 
     @Override
     public String toString() {
         return "ReportData{" +
-                "parameterReport=" + parameterReport +
+                "languageGson=" + languageGson +
                 ", jsonData=" + jsonData +
                 ", parameterJSON=" + parameterJSON +
                 ", isImage=" + isImage +
-                ", reportBytes=" + Arrays.toString(reportBytes) +
+                ", reportBytes=" + String.valueOf(reportBytes) +
                 '}';
     }
 }

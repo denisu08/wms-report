@@ -3,15 +3,11 @@ package com.wirecard.wms.report.controller;
 import com.wirecard.wms.report.service.ReportGeneratorService;
 import com.wirecard.wms.report.vo.ReportData;
 import com.wirecard.wms.report.vo.User;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -53,7 +49,8 @@ public class ReportController {
         return "FindUsers";
     }
 
-    @RequestMapping(value = "/downloadReport", method = RequestMethod.POST)
+    @RequestMapping(value = "/downloadReport", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
     public Map downloadReport(@RequestBody ReportData reportData) throws Exception {
         // Start the clock
         long start = System.currentTimeMillis();
