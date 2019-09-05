@@ -1,6 +1,8 @@
 package com.wirecard.wms.report.service;
 
 
+import com.google.gson.Gson;
+import com.wirecard.wms.report.config.MapResourceBundle;
 import com.wirecard.wms.report.vo.ReportData;
 import com.wirecard.wms.report.vo.User;
 import net.sf.jasperreports.engine.*;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.imageio.ImageIO;
@@ -56,57 +59,67 @@ public class ReportGeneratorService {
         boolean isJasperMain = false;
         String jasperReportBase64 = null;
         JasperReport mainJasperReport = null;
-//        if (reportData.isImage()) {
-//            design = JRXmlLoader.load(new ByteArrayInputStream(reportData.getReportBytes()));
-//        } else {
-//            List<Map> reportFiles = (List<Map>) reportData.getParameterJSON().get("reportFiles");
-//            for (Map item : reportFiles) {
-//                if (item.get("jasper") != null) {
-//                    byte[] jasperTmpBytes = Base64.getDecoder().decode((String) item.get("jasper"));
-//                    if ((Boolean) item.getOrDefault("isMain", false)) {
-//                        isJasperMain = true;
-//                        jasperReportBase64 = new String(jasperTmpBytes);
-//                        mainJasperReport = (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes));
-//                    } else {
-//                        reportData.getParameterReport().put((String) item.get("keySubReport"), (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes)));
-//                    }
-//                } else {
-//                    byte[] reportTmpBytes = Base64.getDecoder().decode((String) item.get("reportData"));
-//                    if ((Boolean) item.getOrDefault("isMain", false)) {
-//                        design = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
-//                    } else {
-//                        reportData.getParameterReport().put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
-//                    }
-//                }
-//            }
-//        }
-//
-//        JsonDataSource jsonDataSource = new JsonDataSource(new ByteArrayInputStream(reportData.getJsonData().toString().getBytes()));
-//        if (isJasperMain) {
-//            jasperPrint = JasperFillManager.fillReport(mainJasperReport, reportData.getParameterReport(), jsonDataSource);
-//        } else {
-//            ByteArrayOutputStream bais = new ByteArrayOutputStream();
-//            JasperCompileManager.compileReportToStream(design, bais);
-//            jasperReportBase64 = new String(Base64.getEncoder().encode(bais.toByteArray()));
-//            jasperPrint = JasperFillManager.fillReport(new ByteArrayInputStream(bais.toByteArray()), reportData.getParameterReport(), jsonDataSource);
-//        }
-//
-//        JasperPrintManager printManager = JasperPrintManager.getInstance(DefaultJasperReportsContext.getInstance());
-//
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        if (reportData.isImage()) {
-//            BufferedImage rendered_image = (BufferedImage) printManager.printPageToImage(jasperPrint, 0, 1.6f);
-//            ImageIO.write(rendered_image, "png", outputStream);
-//        } else {
-//            JRPdfExporter exporter = new JRPdfExporter();
-//            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-//            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
-//            exporter.exportReport();
-//        }
+
+        String languageGsonValue = reportData.getLanguageGson();
+        Map parameterJSONValue = reportData.getParameterJSONValue();
+        Map parameterReportValue = new HashMap();
+        parameterReportValue.put("net.sf.jasperreports.awt.ignore.missing.font", "true");
+        parameterReportValue.put("net.sf.jasperreports.default.font.name", "Open Sans");
+        if(StringUtils.hasText(languageGsonValue)) {
+            Map languageGson = new Gson().fromJson(languageGsonValue, Map.class);
+            parameterReportValue.put("REPORT_RESOURCE_BUNDLE", new MapResourceBundle(languageGson));
+        }
+
+        if (reportData.isImageValue()) {
+            design = JRXmlLoader.load(new ByteArrayInputStream(reportData.getReportBytesValue()));
+        } else {
+            List<Map> reportFiles = (List<Map>) parameterJSONValue.get("reportFiles");
+            for (Map item : reportFiles) {
+                if (item.get("jasper") != null) {
+                    byte[] jasperTmpBytes = Base64.getDecoder().decode((String) item.get("jasper"));
+                    if ((Boolean) item.getOrDefault("isMain", false)) {
+                        isJasperMain = true;
+                        jasperReportBase64 = (String) item.get("jasper");
+                        mainJasperReport = (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes));
+                    } else {
+                        parameterReportValue.put((String) item.get("keySubReport"), (JasperReport) JRLoader.loadObject(new ByteArrayInputStream(jasperTmpBytes)));
+                    }
+                } else {
+                    byte[] reportTmpBytes = Base64.getDecoder().decode((String) item.get("reportData"));
+                    if ((Boolean) item.getOrDefault("isMain", false)) {
+                        design = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
+                    } else {
+                        reportData.getParameterJSONValue().put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
+                    }
+                }
+            }
+        }
+
+        JsonDataSource jsonDataSource = new JsonDataSource(new ByteArrayInputStream(reportData.getJsonData().toString().getBytes()));
+        if (isJasperMain) {
+            jasperPrint = JasperFillManager.fillReport(mainJasperReport, parameterReportValue, jsonDataSource);
+        } else {
+            ByteArrayOutputStream bais = new ByteArrayOutputStream();
+            JasperCompileManager.compileReportToStream(design, bais);
+            jasperReportBase64 = new String(Base64.getEncoder().encode(bais.toByteArray()));
+            jasperPrint = JasperFillManager.fillReport(new ByteArrayInputStream(bais.toByteArray()), parameterReportValue, jsonDataSource);
+        }
+
+        JasperPrintManager printManager = JasperPrintManager.getInstance(DefaultJasperReportsContext.getInstance());
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        if (reportData.isImageValue()) {
+            BufferedImage rendered_image = (BufferedImage) printManager.printPageToImage(jasperPrint, 0, 1.6f);
+            ImageIO.write(rendered_image, "png", outputStream);
+        } else {
+            JRPdfExporter exporter = new JRPdfExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+            exporter.exportReport();
+        }
 
         Map results = new HashMap();
-//        results.put("report", outputStream.toByteArray());
-        results.put("report", "");
+        results.put("report", Base64.getEncoder().encodeToString(outputStream.toByteArray()));
         results.put("jasper", jasperReportBase64);
 
         return CompletableFuture.completedFuture(results);

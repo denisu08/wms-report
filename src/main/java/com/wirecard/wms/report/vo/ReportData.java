@@ -81,7 +81,7 @@ public class ReportData implements Serializable {
     }
 
     public boolean isImageValue() {
-        return "N".equalsIgnoreCase(this.isImage);
+        return "Y".equalsIgnoreCase(this.isImage);
     }
 
     public byte[] getReportBytesValue() {
