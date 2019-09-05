@@ -13,7 +13,6 @@ import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -89,7 +88,7 @@ public class ReportGeneratorService {
                     if ((Boolean) item.getOrDefault("isMain", false)) {
                         design = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
                     } else {
-                        reportData.getParameterJSONValue().put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
+                        parameterReportValue.put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
                     }
                 }
             }
