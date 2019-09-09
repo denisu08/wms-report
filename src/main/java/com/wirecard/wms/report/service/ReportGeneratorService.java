@@ -100,7 +100,7 @@ public class ReportGeneratorService {
         } else {
             ByteArrayOutputStream bais = new ByteArrayOutputStream();
             JasperCompileManager.compileReportToStream(design, bais);
-            jasperReportBase64 = new String(Base64.getEncoder().encode(bais.toByteArray()));
+            jasperReportBase64 = Base64.getEncoder().encodeToString(bais.toByteArray());
             jasperPrint = JasperFillManager.fillReport(new ByteArrayInputStream(bais.toByteArray()), parameterReportValue, jsonDataSource);
         }
 
