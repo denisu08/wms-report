@@ -1,5 +1,6 @@
 package com.wirecard.wms.report;
 
+import com.wirecard.wms.report.data.Handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -17,9 +18,26 @@ public class WmsReportApplication {
 
 	private static final Logger logger = LogManager.getLogger(WmsReportApplication.class);
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		Handler.install(); // Install Joop's protocol handler
 		SpringApplication.run(WmsReportApplication.class, args);
+
+		// TestCompile()
 	}
+
+	/*public static void TestCompile() {
+		//Compile report and fill, no datasource needed
+		JasperReport report = JasperCompileManager.compileReport("htmlComponentBase64.jrxml");
+		JasperPrint jasperPrint = JasperFillManager.fillReport(report, new HashMap<String, Object>());
+
+		//Export to pdf
+		JRPdfExporter exporter = new JRPdfExporter();
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput("pdf/htmlcomponentbase64.pdf"));
+		SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+		exporter.setConfiguration(configuration);
+		exporter.exportReport();
+	}*/
 
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {

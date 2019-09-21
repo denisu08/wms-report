@@ -32,3 +32,5 @@ build/
 
 ### generate files
 logs
+
+pdf/**
