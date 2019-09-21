@@ -8,7 +8,6 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -40,10 +39,12 @@ public class WmsReportApplication {
 	public static void TestCompile() throws Exception {
 		//Compile report and fill, no datasource needed
 		JasperReport report = JasperCompileManager.compileReport("htmlComponentBase64.jrxml");
-		Map reportParameter = new HashMap<>();
+		Map parameters = new HashMap<>();
 		String paramPDF = new String(Files.readAllBytes(Paths.get("test.txt")));
-		reportParameter.put("TEST_PDF", paramPDF);
-		JasperPrint jasperPrint = JasperFillManager.fillReport(report, reportParameter);
+		parameters.put("TEST_PDF", paramPDF);
+		parameters.put("net.sf.jasperreports.awt.ignore.missing.font",  "true");
+		parameters.put("net.sf.jasperreports.default.font.name", "Open Sans");
+		JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters);
 
 		//Export to pdf
 		JRPdfExporter exporter = new JRPdfExporter();
