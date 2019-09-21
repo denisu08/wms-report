@@ -1,6 +1,14 @@
 package com.wirecard.wms.report;
 
 import com.wirecard.wms.report.data.Handler;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -10,7 +18,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @EnableAsync
 @SpringBootApplication
@@ -22,22 +34,25 @@ public class WmsReportApplication {
 		Handler.install(); // Install Joop's protocol handler
 		SpringApplication.run(WmsReportApplication.class, args);
 
-		// TestCompile()
+		// TestCompile();
 	}
 
-	/*public static void TestCompile() {
+	public static void TestCompile() throws Exception {
 		//Compile report and fill, no datasource needed
 		JasperReport report = JasperCompileManager.compileReport("htmlComponentBase64.jrxml");
-		JasperPrint jasperPrint = JasperFillManager.fillReport(report, new HashMap<String, Object>());
+		Map reportParameter = new HashMap<>();
+		String paramPDF = new String(Files.readAllBytes(Paths.get("test.txt")));
+		reportParameter.put("TEST_PDF", paramPDF);
+		JasperPrint jasperPrint = JasperFillManager.fillReport(report, reportParameter);
 
 		//Export to pdf
 		JRPdfExporter exporter = new JRPdfExporter();
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput("pdf/htmlcomponentbase64.pdf"));
-		SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-		exporter.setConfiguration(configuration);
+		// SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+		// exporter.setConfiguration(configuration);
 		exporter.exportReport();
-	}*/
+	}
 
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
