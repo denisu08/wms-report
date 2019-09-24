@@ -8,6 +8,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -32,8 +33,6 @@ public class WmsReportApplication {
 	public static void main(String[] args) throws Exception {
 		Handler.install(); // Install Joop's protocol handler
 		SpringApplication.run(WmsReportApplication.class, args);
-
-		// TestCompile();
 	}
 
 	public static void TestCompile() throws Exception {
@@ -50,8 +49,8 @@ public class WmsReportApplication {
 		JRPdfExporter exporter = new JRPdfExporter();
 		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 		exporter.setExporterOutput(new SimpleOutputStreamExporterOutput("pdf/htmlcomponentbase64.pdf"));
-		// SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
-		// exporter.setConfiguration(configuration);
+		SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+		exporter.setConfiguration(configuration);
 		exporter.exportReport();
 	}
 

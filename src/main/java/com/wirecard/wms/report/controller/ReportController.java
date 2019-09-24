@@ -1,5 +1,6 @@
 package com.wirecard.wms.report.controller;
 
+import com.wirecard.wms.report.WmsReportApplication;
 import com.wirecard.wms.report.service.ReportGeneratorService;
 import com.wirecard.wms.report.vo.ReportData;
 import com.wirecard.wms.report.vo.User;
@@ -9,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,7 +26,25 @@ public class ReportController {
 
     @RequestMapping("/")
     public String index() throws Exception {
+        forcefullyInstall(new com.wirecard.wms.report.data.URLStreamHandlerFactory());
+        // WmsReportApplication.TestCompile();
         return "Unknown Service";
+    }
+
+    public static void forcefullyInstall(URLStreamHandlerFactory factory) {
+        try {
+            // Try doing it the normal way
+            URL.setURLStreamHandlerFactory(factory);
+        } catch (final Error e) {
+            // Force it via reflection
+            try {
+                final Field factoryField = URL.class.getDeclaredField("factory");
+                factoryField.setAccessible(true);
+                factoryField.set(null, factory);
+            } catch (NoSuchFieldException | IllegalAccessException e1) {
+                throw new Error("Could not access factory field on URL class: {}", e);
+            }
+        }
     }
 
     @RequestMapping("/findUsers")
