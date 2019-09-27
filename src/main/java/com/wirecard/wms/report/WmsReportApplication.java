@@ -31,16 +31,17 @@ public class WmsReportApplication {
 	private static final Logger logger = LogManager.getLogger(WmsReportApplication.class);
 
 	public static void main(String[] args) throws Exception {
-		Handler.install(); // Install Joop's protocol handler
+		// Handler.install(); // Install Joop's protocol handler
 		SpringApplication.run(WmsReportApplication.class, args);
+		// WmsReportApplication.TestCompile();
 	}
 
 	public static void TestCompile() throws Exception {
 		//Compile report and fill, no datasource needed
-		JasperReport report = JasperCompileManager.compileReport("htmlComponentBase64.jrxml");
+		JasperReport report = JasperCompileManager.compileReport("htmlComponentBase64_new.jrxml");
 		Map parameters = new HashMap<>();
-		String paramPDF = new String(Files.readAllBytes(Paths.get("test.txt")));
-		parameters.put("TEST_PDF", paramPDF);
+//		String paramPDF = new String(Files.readAllBytes(Paths.get("test.txt")));
+//		parameters.put("TEST_PDF", paramPDF);
 		parameters.put("net.sf.jasperreports.awt.ignore.missing.font",  "true");
 		parameters.put("net.sf.jasperreports.default.font.name", "Open Sans");
 		JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters);

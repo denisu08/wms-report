@@ -24,10 +24,13 @@ public class ReportController {
     @Autowired
     private ReportGeneratorService reportGeneratorService;
 
+    public ReportController() {
+        forcefullyInstall(new com.wirecard.wms.report.data.URLStreamHandlerFactory());
+    }
+
     @RequestMapping("/")
     public String index() throws Exception {
-        forcefullyInstall(new com.wirecard.wms.report.data.URLStreamHandlerFactory());
-        // WmsReportApplication.TestCompile();
+        WmsReportApplication.TestCompile();
         return "Unknown Service";
     }
 
