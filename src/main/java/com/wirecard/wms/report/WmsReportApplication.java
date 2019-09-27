@@ -21,7 +21,7 @@ public class WmsReportApplication {
 
 	private static final Logger logger = LogManager.getLogger(WmsReportApplication.class);
 
-	@Value("${directory}")
+	@Value("${report.virtual.directory}")
 	private String directory;
 
 	@Bean
