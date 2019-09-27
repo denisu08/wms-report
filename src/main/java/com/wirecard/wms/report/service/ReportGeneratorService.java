@@ -9,13 +9,19 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
+import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -36,6 +42,12 @@ public class ReportGeneratorService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportGeneratorService.class);
     private final RestTemplate restTemplate;
+
+    @Autowired
+    JRFileVirtualizer fv;
+
+    @Autowired
+    JRSwapFileVirtualizer sfv;
 
     public ReportGeneratorService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
@@ -62,6 +74,7 @@ public class ReportGeneratorService {
         String languageGsonValue = reportData.getLanguageGson();
         Map parameterJSONValue = reportData.getParameterJSONValue();
         Map parameterReportValue = new HashMap();
+        parameterReportValue.put(JRParameter.REPORT_VIRTUALIZER, fv);
         parameterReportValue.put("net.sf.jasperreports.awt.ignore.missing.font", "true");
         parameterReportValue.put("net.sf.jasperreports.default.font.name", "Open Sans");
         if(StringUtils.hasText(languageGsonValue)) {

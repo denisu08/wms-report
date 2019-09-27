@@ -30,7 +30,6 @@ public class ReportController {
 
     @RequestMapping("/")
     public String index() throws Exception {
-        WmsReportApplication.TestCompile();
         return "Unknown Service";
     }
 
