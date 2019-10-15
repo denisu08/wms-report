@@ -13,6 +13,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 @EnableAsync
@@ -31,6 +34,7 @@ public class WmsReportApplication {
 
 	@Bean
 	JRSwapFileVirtualizer swapFileVirtualizer() {
+		if(!Files.exists(Paths.get(directory))) new File(directory).mkdirs();
 		JRSwapFile sf = new JRSwapFile(directory, 1024, 100);
 		return new JRSwapFileVirtualizer(20, sf, true);
 	}
