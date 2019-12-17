@@ -14,6 +14,7 @@ import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.engine.xml.JRXmlTemplateLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
@@ -31,10 +32,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -82,12 +80,23 @@ public class ReportGeneratorService {
             parameterReportValue.put("REPORT_RESOURCE_BUNDLE", new MapResourceBundle(languageGson));
         }
 
+        // load styles
+        List templateList = new ArrayList();
+        if(parameterJSONValue.containsKey("templateList")) {
+            for(Object templateTmp : (Collection) parameterJSONValue.get("templateList")) {
+                byte[] reportTmpBytes = Base64.getDecoder().decode((String) templateTmp);
+                templateList.add((JRSimpleTemplate) JRXmlTemplateLoader.load(new ByteArrayInputStream(reportTmpBytes)));
+            }
+            parameterReportValue.put(JRParameter.REPORT_TEMPLATES, templateList);
+        }
+        boolean needToCompile = templateList.size() > 0;
+
         if (reportData.isImageValue()) {
             design = JRXmlLoader.load(new ByteArrayInputStream(reportData.getReportBytesValue()));
         } else {
             List<Map> reportFiles = (List<Map>) parameterJSONValue.get("reportFiles");
             for (Map item : reportFiles) {
-                if (item.get("jasper") != null) {
+                if (!needToCompile && item.get("jasper") != null) {
                     byte[] jasperTmpBytes = Base64.getDecoder().decode((String) item.get("jasper"));
                     if ((Boolean) item.getOrDefault("isMain", false)) {
                         isJasperMain = true;
@@ -100,8 +109,11 @@ public class ReportGeneratorService {
                     byte[] reportTmpBytes = Base64.getDecoder().decode((String) item.get("reportData"));
                     if ((Boolean) item.getOrDefault("isMain", false)) {
                         design = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
+                        this.setStyleFromTemplate(design, templateList);
                     } else {
-                        parameterReportValue.put((String) item.get("keySubReport"), JasperCompileManager.compileReport(JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes))));
+                        JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(reportTmpBytes));
+                        this.setStyleFromTemplate(jasperDesign, templateList);
+                        parameterReportValue.put((String) item.get("keySubReport"), JasperCompileManager.compileReport(jasperDesign));
                     }
                 }
             }
@@ -135,5 +147,15 @@ public class ReportGeneratorService {
         results.put("jasper", jasperReportBase64);
 
         return CompletableFuture.completedFuture(results);
+    }
+
+    private void setStyleFromTemplate(JasperDesign design, List<JRSimpleTemplate> templateList) throws JRException {
+        if(templateList != null && !templateList.isEmpty()) {
+            for(JRSimpleTemplate jrSimpleTemplate : templateList) {
+                for(JRStyle jrStyle : jrSimpleTemplate.getStyles()) {
+                    design.addStyle(jrStyle);
+                }
+            }
+        }
     }
 }
