@@ -75,6 +75,7 @@ public class ReportGeneratorService {
         parameterReportValue.put(JRParameter.REPORT_VIRTUALIZER, fv);
         parameterReportValue.put("net.sf.jasperreports.awt.ignore.missing.font", "true");
         parameterReportValue.put("net.sf.jasperreports.default.font.name", "Open Sans");
+        parameterReportValue.put("WMS_CONFIG", parameterJSONValue.get("constantVariableMap"));
         if(StringUtils.hasText(languageGsonValue)) {
             Map languageGson = new Gson().fromJson(languageGsonValue, Map.class);
             parameterReportValue.put("REPORT_RESOURCE_BUNDLE", new MapResourceBundle(languageGson));
